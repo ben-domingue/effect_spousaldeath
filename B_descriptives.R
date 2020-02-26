@@ -47,6 +47,8 @@ for (var in names(vars)) f(tmp[[var]])->tab[[vars[var] ]]
 do.call("rbind",tab)->tab2
 cbind(tab1,tab2)->tab
 write.csv(tab,"")
+nrow(df)
+nrow(tmp)
 
 
 ##role of age
