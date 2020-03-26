@@ -91,6 +91,7 @@ m[[6]]<-lm(dead.5year~age+age2+wave+fp.cesd.res,df[df$fpd==1 & df$gr==2 & df$rag
 table.lm(m,se=TRUE)->tab
 write.csv(tab[,c(2,4:6)])
 
+##risk for older respondents
 set.seed(8030301)
 df[df$fpd==1 & df$gr==2,]->tmp
 mean(tmp$age)->fix.age
@@ -99,6 +100,29 @@ m[[4]]->M
 predict(M,data.frame(age=fix.age,age2=fix.age^2,male=0,wave=10,fp.cesd.res=qu),se.fit=TRUE)$fit->z
 z[2]
 z[1]
+z[2]/z[1]
+boot<-list()
+for (i in 1:1000) {
+    M$model->tmp
+    sample(1:nrow(tmp),nrow(tmp),replace=TRUE)->index
+    lm(dead.5year~age+age2+male+wave+fp.cesd.res,tmp[index,])->mm
+    predict(mm,data.frame(age=fix.age,age2=fix.age^2,male=0,wave=10,fp.cesd.res=qu),se.fit=TRUE)$fit->z
+    c(z[2],z[1])->boot[[i]]
+}    
+do.call("rbind",boot)->boot
+apply(boot,2,quantile,c(.025,.975))
+
+
+##younger respondents
+set.seed(8030301)
+df[df$fpd==1 & df$gr==1,]->tmp
+mean(tmp$age)->fix.age
+quantile(tmp$fp.cesd.res,c(.25,.75),na.rm=TRUE)->qu
+m[[2]]->M
+predict(M,data.frame(age=fix.age,age2=fix.age^2,male=0,wave=10,fp.cesd.res=qu),se.fit=TRUE)$fit->z
+z[2]
+z[1]
+100*(z[2]/z[1])
 boot<-list()
 for (i in 1:1000) {
     M$model->tmp
